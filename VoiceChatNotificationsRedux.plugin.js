@@ -13,20 +13,25 @@ class VoiceChatNotificationsRedux {
             displayWhileFocused: true,
             displayUpdateNotes: true,
             suppressInDnd: true,
-            targetClass: "scroller-2FKFPG"
+            targetClass: "scroller-2FKFPG",
+            locale: "en-US"
         };
 
     }
 
     getName() { return "VoiceChatNotificationsRedux"; }
-    getDescription() { return "Displays notifications when users connect/disconnect, mute/unmute, and deafen/undeafen in the voice channel you're in. Press Alt + V to toggle the voice log. Based on VoiceChatNotifications by Metalloriff."; }
-    getVersion() { return "1.0.0"; }
+    getDescription() { return "Displays notifications when users connect/disconnect, mute/unmute, and deafen/undeafen in the voice channel you're in. Press Alt + C to toggle the voice log. Based on VoiceChatNotifications by Metalloriff."; }
+    getVersion() { return "1.1.0"; }
     getAuthor() { return "Grufkork/Metalloriff"; }
     getChanges() {
         return {
             "1.0.0":
                 `
                 Cut some bits and fixed som bugs in Metalloriff's VoiceChatNoticitaions. The updating part won't work, but it otherwise seems to have full functionality.
+            `,
+            "1.1.0":
+                `
+                Fixed log order, added time format locale option
             `
         };
     }
@@ -70,8 +75,13 @@ class VoiceChatNotificationsRedux {
                 this.saveSettings();
             }), this.getName());
 
-            NeatoLib.Settings.pushElement(NeatoLib.Settings.Elements.createNewTextField("Class of target node to cover", "scroller-2FKFPG", (e)=>{
-                this.settings[targetClass] = e.value;
+            NeatoLib.Settings.pushElement(NeatoLib.Settings.Elements.createNewTextField("Class of target node to cover", this.settings.targetClass, (e)=>{
+                this.settings.targetClass = e.target.value;
+                this.saveSettings();
+            }), this.getName());
+
+            NeatoLib.Settings.pushElement(NeatoLib.Settings.Elements.createNewTextField("Time Format Locale", this.settings.locale, (e)=>{
+                this.settings.locale = e.target.value;
                 this.saveSettings();
             }), this.getName());
 
@@ -129,7 +139,7 @@ class VoiceChatNotificationsRedux {
                     let user = getUser(id), channel = getChannel(newStates[id].channelId);
                     if (user && channel) {
                         if (!this.settings.suppressInDnd || NeatoLib.getLocalStatus() != "dnd") new Notification(`${user.username} joined ${channel.name}`, { silent: true, icon: user.getAvatarURL() });
-                        this.log.push({ avatar: user.getAvatarURL(), username: user.username, timestamp: new Date().toLocaleTimeString(), text: `Joined ${channel.name}` });
+                        this.log.splice(0, 0, { avatar: user.getAvatarURL(), username: user.username, timestamp: new Date(), text: `Joined ${channel.name}` });
                     }
                 } else {
 
@@ -139,7 +149,7 @@ class VoiceChatNotificationsRedux {
 
                         if (user && channel) {
                             if (!this.settings.suppressInDnd || NeatoLib.getLocalStatus() != "dnd") new Notification(`${user.username} moved to ${channel.name}`, { silent: true, icon: user.getAvatarURL() });
-                            this.log.push({ avatar: user.getAvatarURL(), username: user.username, timestamp: new Date().toLocaleTimeString(), text: `Moved to ${channel.name}` });
+                            this.log.splice(0, 0, { avatar: user.getAvatarURL(), username: user.username, timestamp: new Date(), text: `Moved to ${channel.name}` });
                         }
 
                         continue;
@@ -152,7 +162,7 @@ class VoiceChatNotificationsRedux {
 
                         if (user) {
                             if (!this.settings.suppressInDnd || NeatoLib.getLocalStatus() != "dnd") new Notification(`${user.username} ${newStates[id].deaf ? "server deafened" : "server undeafened"}`, { silent: true, icon: user.getAvatarURL() });
-                            this.log.push({ avatar: user.getAvatarURL(), username: user.username, timestamp: new Date().toLocaleTimeString(), text: newStates[id].deaf ? "Server deafened" : "Server undeafened" });
+                            this.log.splice(0, 0, { avatar: user.getAvatarURL(), username: user.username, timestamp: new Date(), text: newStates[id].deaf ? "Server deafened" : "Server undeafened" });
                         }
 
                         continue;
@@ -165,7 +175,7 @@ class VoiceChatNotificationsRedux {
 
                         if (user) {
                             if (!this.settings.suppressInDnd || NeatoLib.getLocalStatus() != "dnd") new Notification(`${user.username} ${newStates[id].mute ? "server muted" : "server unmuted"}`, { silent: true, icon: user.getAvatarURL() });
-                            this.log.push({ avatar: user.getAvatarURL(), username: user.username, timestamp: new Date().toLocaleTimeString(), text: newStates[id].mute ? "Server muted" : "Server unmuted" });
+                            this.log.splice(0, 0, { avatar: user.getAvatarURL(), username: user.username, timestamp: new Date(), text: newStates[id].mute ? "Server muted" : "Server unmuted" });
                         }
 
                         continue;
@@ -178,7 +188,7 @@ class VoiceChatNotificationsRedux {
 
                         if (user) {
                             if (!this.settings.suppressInDnd || NeatoLib.getLocalStatus() != "dnd") new Notification(`${user.username} ${newStates[id].selfDeaf ? "deafened" : "undeafened"}`, { silent: true, icon: user.getAvatarURL() });
-                            this.log.push({ avatar: user.getAvatarURL(), username: user.username, timestamp: new Date().toLocaleTimeString(), text: newStates[id].selfDeaf ? "Deafened" : "Undeafened" });
+                            this.log.splice(0, 0, { avatar: user.getAvatarURL(), username: user.username, timestamp: new Date(), text: newStates[id].selfDeaf ? "Deafened" : "Undeafened" });
                         }
 
                         continue;
@@ -191,7 +201,7 @@ class VoiceChatNotificationsRedux {
 
                         if (user) {
                             if (!this.settings.suppressInDnd || NeatoLib.getLocalStatus() != "dnd") new Notification(`${user.username} ${newStates[id].selfMute ? "muted" : "unmuted"}`, { silent: true, icon: user.getAvatarURL() });
-                            this.log.push({ avatar: user.getAvatarURL(), username: user.username, timestamp: new Date().toLocaleTimeString(), text: newStates[id].selfMute ? "Muted" : "Unmuted" });
+                            this.log.splice(0, 0, { avatar: user.getAvatarURL(), username: user.username, timestamp: new Date(), text: newStates[id].selfMute ? "Muted" : "Unmuted" });
                         }
 
                     }
@@ -207,7 +217,7 @@ class VoiceChatNotificationsRedux {
                     let user = getUser(id), channel = getChannel(lastStates[id].channelId);
                     if (user && channel) {
                         if (!this.settings.suppressInDnd || NeatoLib.getLocalStatus() != "dnd") new Notification(`${user.username} left ${channel.name}`, { silent: true, icon: user.getAvatarURL() });
-                        this.log.push({ avatar: user.getAvatarURL(), username: user.username, timestamp: new Date().toLocaleTimeString(), text: `Left ${channel.name}` });
+                        this.log.splice(0, 0, { avatar: user.getAvatarURL(), username: user.username, timestamp: new Date(), text: `Left ${channel.name}` });
                     }
                 }
 
@@ -234,9 +244,10 @@ class VoiceChatNotificationsRedux {
             if (e.altKey) {
                 if (e.key == "c") {
                     if (document.getElementById("voiceChatLogContainer") == null) {
-                        if (this.log.length > 50) this.log.splice(50, this.log.length);
-
-                        let rect = document.getElementsByClassName(this.settings.targetClass)[0].getBoundingClientRect(); // Change target window to replace here!
+                        while (this.log.length > 50){
+                            this.log.pop();
+                        }
+                        let rect = document.getElementsByClassName(this.settings.targetClass)[0].getBoundingClientRect();
                         let logDiv = document.createElement("div");
 
                         logDiv.id = "voiceChatLogContainer";
@@ -265,11 +276,23 @@ class VoiceChatNotificationsRedux {
                                 this.log[i].timestamp += " ";
                             }
                             logDiv.innerHTML += `<br>
+                            <div class="voiceChatNotificationGridContainer" style="display:grid; grid-template-columns: min-content auto; grid-column-gap:5px;">
+                                    <img src="${this.log[i].avatar}" style="grid-column:1; grid-row:1/3; height:32px;"></img>
+                                <div style="grid-column:2; grid-row:1;">
+                                    <b class="voiceChatLogUsername">${this.log[i].username}</b> - 
+                                    <span class="voiceChatLogTimestamp" style="font-family:consolas;">${this.log[i].timestamp.toLocaleTimeString(this.settings.locale)}</span>
+                                </div>
+                                <div style="grid-column:2; grid-row:2;">
+                                    ${this.log[i].text}
+                                </div>
+                            </div>`;
+                            
+                            /*`<br>
                         <span class="voiceChatLogRow">
                             <span style="font-family:consolas" class="voiceChatLogTimestamp">${this.log[i].timestamp}</span>&nbsp;
                             <b class="voiceChatLogUsername">${this.log[i].username}</b> 
                             ${this.log[i].text}
-                        </span>`;
+                        </span>`;*/
                         }
                         document.getElementById("app-mount").appendChild(logDiv);
 
