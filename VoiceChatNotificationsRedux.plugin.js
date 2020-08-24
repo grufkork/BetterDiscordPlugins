@@ -21,7 +21,7 @@ class VoiceChatNotificationsRedux {
 
     getName() { return "VoiceChatNotificationsRedux"; }
     getDescription() { return "Displays notifications when users connect/disconnect, mute/unmute, and deafen/undeafen in the voice channel you're in. Press Alt + C to toggle the voice log. Based on VoiceChatNotifications by Metalloriff."; }
-    getVersion() { return "1.1.0"; }
+    getVersion() { return "1.2.0"; }
     getAuthor() { return "Grufkork/Metalloriff"; }
     getChanges() {
         return {
@@ -32,6 +32,10 @@ class VoiceChatNotificationsRedux {
             "1.1.0":
                 `
                 Fixed log order, added time format locale option
+            `,
+            "1.2.0":
+                `
+                Changed NeatoBurrito library source, so it uses the version from when I forked
             `
         };
     }
@@ -50,7 +54,7 @@ class VoiceChatNotificationsRedux {
             lib = document.createElement("script");
             lib.setAttribute("id", "NeatoBurritoLibrary");
             lib.setAttribute("type", "text/javascript");
-            lib.setAttribute("src", "https://rawgit.com/Metalloriff/BetterDiscordPlugins/master/Lib/NeatoBurritoLibrary.js");
+            lib.setAttribute("src", "https://raw.githubusercontent.com/grufkork/BetterDiscordPlugins/master/Lib/NeatoBurritoLibrary.js");
             document.head.appendChild(lib);
         }
         if (typeof window.Metalloriff !== "undefined") libLoadedEvent();
